@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Тренажер расчета искробезопасных цепей Интелис</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7f9;
+    color: #17324d;
+}
+
+.game {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #617589;
+    margin-bottom: 20px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.progress {
+    height: 8px;
+    background: #dce6ed;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 5%;
+    background: #0b8fc4;
+    transition: width 0.3s;
+}
+
+.level {
+    display: inline-block;
+    background: #e8f1f5;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.source {
+    border-left: 4px solid #0b8fc4;
+}
+
+.equipment {
+    border-left: 4px solid #19a974;
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+.parameter {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #dbe4ea;
+}
+
+.parameter:last-child {
+    border-bottom: none;
+}
+
+.value {
+    font-weight: bold;
+    text-align: right;
+}
+
+.rules {
+    margin-top: 18px;
+    padding: 20px;
+    background: #f0f5f7;
+    border-radius: 14px;
+}
+
+.rule {
+    padding: 6px 0;
+    font-family: monospace;
+    font-size: 16px;
+}
+
+.question {
+    margin-top: 20px;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 14px;
+    text-align: center;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 13px 24px;
+    margin: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+.yes {
+    background: #159b68;
+}
+
+.no {
+    background: #d64b57;
+}
+
+.next {
+    background: #0b8fc4;
+}
+
+.calculate {
+    background: #087fae;
+}
+
+.calc-box {
+    margin-top: 18px;
+    padding: 20px;
+    background: #eaf2f6;
+    border-radius: 14px;
+}
+
+.calc-box h3 {
+    margin-top: 0;
+}
+
+.calc-row {
+    margin: 12px 0;
+}
+
+.calc-row input {
+    width: 160px;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 7px;
+    border: 1px solid #b8c9d4;
+    background: #ffffff;
+    color: #17324d;
+    font-size: 16px;
+}
+
+.result {
+    display: none;
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.correct {
+    background: #e5f6ee;
+    border: 1px solid #159b68;
+}
+
+.wrong {
+    background: #fdebed;
+    border: 1px solid #d64b57;
+}
+
+.ok {
+    color: #087b52;
+}
+
+.fail {
+    color: #c93443;
+}
+
+.hidden {
+    display: none;
+}
+
+.final {
+    text-align: center;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 14px;
+}
+
+.final h2 {
+    font-size: 30px;
+}
+
+@media (max-width: 700px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>⚡ Тренажер расчета искробезопасных цепей Интелис</h1>
+
+    <div class="subtitle">
+        Проверка параметров искробезопасной цепи
+    </div>
+
+    <div class="topbar">
+        <div>
+            Раунд:
+            <b><span id="round">1</span> / 20</b>
+        </div>
+
+        <div>
+            Очки:
+            <b id="score">0</b>
+        </div>
+    </div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div id="gameArea">
+
+        <div class="level" id="level">
+            Уровень: начальный
+        </div>
+
+        <div class="cards">
+
+            <div class="card source">
+
+                <h2>🛡️ Связанное оборудование</h2>
+
+                <div class="parameter">
+                    <span>U₀</span>
+                    <span class="value" id="u0"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>I₀</span>
+                    <span class="value" id="i0"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>P₀</span>
+                    <span class="value" id="p0"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>C₀</span>
+                    <span class="value" id="c0"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>L₀</span>
+                    <span class="value" id="l0"></span>
+                </div>
+
+            </div>
+
+            <div class="card equipment">
+
+                <h2>🔌 Искробезопасное оборудование</h2>
+
+                <div class="parameter">
+                    <span>Uᵢ</span>
+                    <span class="value" id="ui"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>Iᵢ</span>
+                    <span class="value" id="ii"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>Pᵢ</span>
+                    <span class="value" id="pi"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>Cᵢ</span>
+                    <span class="value" id="ci"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>Lᵢ</span>
+                    <span class="value" id="li"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>C кабеля</span>
+                    <span class="value" id="ccable"></span>
+                </div>
+
+                <div class="parameter">
+                    <span>L кабеля</span>
+                    <span class="value" id="lcable"></span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- РАСЧЁТ КАБЕЛЯ -->
+
+        <div class="calc-box hidden" id="calcBox">
+
+            <h3>🧮 Расчёт параметров кабеля</h3>
+
+            <div id="calcDescription"></div>
+
+            <div class="calc-row">
+                <label>
+                    <b>Cкабеля =</b>
+                </label>
+
+                <input
+                    id="cAnswer"
+                    type="number"
+                    step="any"
+                    placeholder="Ответ"
+                >
+
+                <span id="cAnswerUnit">nF</span>
+            </div>
+
+            <div class="calc-row">
+                <label>
+                    <b>Lкабеля =</b>
+                </label>
+
+                <input
+                    id="lAnswer"
+                    type="number"
+                    step="any"
+                    placeholder="Ответ"
+                >
+
+                <span>µH</span>
+            </div>
+
+            <button
+                class="calculate"
+                onclick="checkCableCalculation()"
+            >
+                Проверить расчёт
+            </button>
+
+            <div id="calcResult"></div>
+
+        </div>
+
+
+        <!-- ПРАВИЛА -->
+
+        <div class="rules">
+
+            <h2>📋 Правила проверки</h2>
+
+            <div class="rule">
+                Uᵢ ≥ U₀
+            </div>
+
+            <div class="rule">
+                Iᵢ ≥ I₀
+            </div>
+
+            <div class="rule">
+                Pᵢ ≥ P₀
+            </div>
+
+            <div class="rule">
+                Cᵢ + Cкабеля ≤ C₀
+            </div>
+
+            <div class="rule">
+                Lᵢ + Lкабеля ≤ L₀
+            </div>
+
+        </div>
+
+
+        <!-- ВОПРОС -->
+
+        <div class="question">
+
+            <h2>
+                Является ли соединение допустимым?
+            </h2>
+
+            <button class="yes" onclick="answer(true)">
+                ✓ ДА
+            </button>
+
+            <button class="no" onclick="answer(false)">
+                ✕ НЕТ
+            </button>
+
+            <div id="result" class="result"></div>
+
+            <button
+                id="nextButton"
+                class="next"
+                onclick="nextRound()"
+                style="display:none;"
+            >
+                Следующий раунд →
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   НАСТРОЙКИ ИГРЫ
+===================================================== */
+
+const MAX_ROUNDS = 20;
+
+let round = 1;
+let score = 0;
+let current = null;
+let answered = false;
+let cableCalculated = false;
+
+
+/* =====================================================
+   СЛУЧАЙНОЕ ЧИСЛО
+===================================================== */
+
+function rand(min, max, step) {
+
+    if (max < min) {
+        return min;
+    }
+
+    const count = Math.floor((max - min) / step);
+
+    return min + Math.floor(Math.random() * (count + 1)) * step;
+}
+
+
+/* =====================================================
+   ОКРУГЛЕНИЕ
+===================================================== */
+
+function roundValue(value, digits) {
+
+    const factor = Math.pow(10, digits);
+
+    return Math.round(value * factor) / factor;
+}
+
+
+/* =====================================================
+   СОЗДАНИЕ БЕЗОПАСНОЙ ЗАДАЧИ
+===================================================== */
+
+function createSafeTask() {
+
+    const u0 = rand(10, 30, 5);
+    const i0 = rand(50, 150, 10);
+    const p0 = rand(1, 3, 0.5);
+
+    const c0 = rand(100, 300, 10);
+    const l0 = rand(5000, 15000, 500);
+
+    const cableC = rand(10, 40, 5);
+    const cableL = rand(100, 1000, 100);
+
+    const ci = rand(
+        10,
+        c0 - cableC,
+        5
+    );
+
+    const li = rand(
+        100,
+        l0 - cableL,
+        100
+    );
+
+    return {
+
+        u0: u0,
+        i0: i0,
+        p0: p0,
+        c0: c0,
+        l0: l0,
+
+        ui: rand(u0, u0 + 20, 5),
+        ii: rand(i0, i0 + 100, 10),
+        pi: rand(p0, p0 + 2, 0.1),
+
+        ci: ci,
+        li: li,
+
+        cableC: cableC,
+        cableL: cableL,
+
+        safe: true,
+
+        calculation: false,
+
+        cUnit: "nF",
+        cableCUnit: "nF",
+        lUnit: "µH"
+    };
+}
+
+
+/* =====================================================
+   СОЗДАНИЕ НЕБЕЗОПАСНОЙ ЗАДАЧИ
+===================================================== */
+
+function createUnsafeTask() {
+
+    const task = createSafeTask();
+
+    const violation = Math.floor(Math.random() * 5);
+
+    task.safe = false;
+
+    if (violation === 0) {
+
+        /* Uᵢ < U₀ */
+
+        task.ui = Math.max(
+            1,
+            task.u0 - rand(5, 10, 5)
+        );
+    }
+
+    else if (violation === 1) {
+
+        /* Iᵢ < I₀ */
+
+        task.ii = Math.max(
+            1,
+            task.i0 - rand(10, 50, 10)
+        );
+    }
+
+    else if (violation === 2) {
+
+        /* Pᵢ < P₀ */
+
+        task.pi = Math.max(
+            0.1,
+            task.p0 - rand(0.1, 1, 0.1)
+        );
+    }
+
+    else if (violation === 3) {
+
+        /* Cᵢ + Cкабеля > C₀ */
+
+        task.ci =
+            task.c0 -
+            task.cableC +
+            rand(10, 50, 10);
+    }
+
+    else {
+
+        /* Lᵢ + Lкабеля > L₀ */
+
+        task.li =
+            task.l0 -
+            task.cableL +
+            rand(500, 3000, 500);
+    }
+
+    return task;
+}
+
+
+/* =====================================================
+   ДОБАВЛЕНИЕ РАЗНЫХ ЕДИНИЦ
+===================================================== */
+
+function applyMixedUnits(task) {
+
+    /*
+       Cᵢ иногда показывается в µF.
+
+       1 µF = 1000 nF
+    */
+
+    if (Math.random() < 0.5) {
+        task.cUnit = "µF";
+    } else {
+        task.cUnit = "nF";
+    }
+
+
+    /*
+       Lᵢ иногда показывается в nH.
+
+       1 µH = 1000 nH
+    */
+
+    if (Math.random() < 0.5) {
+        task.lUnit = "nH";
+    } else {
+        task.lUnit = "µH";
+    }
+
+
+    return task;
+}
+
+
+/* =====================================================
+   ДОБАВЛЕНИЕ РАСЧЁТА КАБЕЛЯ
+===================================================== */
+
+function addCableCalculation(task) {
+
+    task.calculation = true;
+
+    task.cableLength = rand(
+        5,
+        100,
+        5
+    );
+
+    task.cPerMeter = rand(
+        1,
+        10,
+        1
+    );
+
+    task.lPerMeter = rand(
+        10,
+        200,
+        10
+    );
+
+
+    /*
+       Расчёт:
+
+       Cкабеля = C/м × длина
+
+       Lкабеля = L/м × длина
+    */
+
+    task.cableC =
+        task.cPerMeter *
+        task.cableLength;
+
+    task.cableL =
+        task.lPerMeter *
+        task.cableLength;
+
+
+    /*
+       После изменения кабеля
+       заново формируем Ci и Li,
+       чтобы безопасные задачи действительно
+       оставались безопасными.
+    */
+
+    if (task.safe) {
+
+        task.ci = rand(
+            5,
+            Math.max(5, task.c0 - task.cableC),
+            5
+        );
+
+        task.li = rand(
+            100,
+            Math.max(100, task.l0 - task.cableL),
+            100
+        );
+
+    } else {
+
+        /*
+           Для сложной задачи нарушаем
+           один из параметров.
+        */
+
+        const violation =
+            Math.floor(Math.random() * 5);
+
+        if (violation === 0) {
+
+            task.ui =
+                Math.max(1, task.u0 - 5);
+
+        } else if (violation === 1) {
+
+            task.ii =
+                Math.max(1, task.i0 - 10);
+
+        } else if (violation === 2) {
+
+            task.pi =
+                Math.max(0.1, task.p0 - 0.2);
+
+        } else if (violation === 3) {
+
+            task.ci =
+                task.c0 -
+                task.cableC +
+                20;
+
+        } else {
+
+            task.li =
+                task.l0 -
+                task.cableL +
+                1000;
+        }
+    }
+
+    return task;
+}
+
+
+/* =====================================================
+   СОЗДАНИЕ РАУНДА
+===================================================== */
+
+function generateRound() {
+
+    let task;
+
+
+    /*
+       50% безопасных,
+       50% небезопасных.
+    */
+
+    if (Math.random() < 0.5) {
+
+        task = createSafeTask();
+
+    } else {
+
+        task = createUnsafeTask();
+    }
+
+
+    /*
+       Раунды 1–5:
+       простые.
+    */
+
+    if (round <= 5) {
+
+        task.calculation = false;
+
+    }
+
+
+    /*
+       Раунды 6–10:
+       разные единицы.
+    */
+
+    else if (round <= 10) {
+
+        task = applyMixedUnits(task);
+    }
+
+
+    /*
+       Раунды 11–15:
+       появляется расчёт кабеля.
+    */
+
+    else if (round <= 15) {
+
+        task = applyMixedUnits(task);
+
+        task = addCableCalculation(task);
+    }
+
+
+    /*
+       Раунды 16–20:
+       смешанные единицы + расчёт кабеля.
+    */
+
+    else {
+
+        task = applyMixedUnits(task);
+
+        task = addCableCalculation(task);
+
+        /*
+           Увеличиваем сложность.
+        */
+
+        task.cableLength = rand(
+            10,
+            250,
+            10
+        );
+
+        task.cPerMeter = rand(
+            1,
+            15,
+            1
+        );
+
+        task.lPerMeter = rand(
+            10,
+            300,
+            10
+        );
+
+
+        task.cableC =
+            task.cPerMeter *
+            task.cableLength;
+
+        task.cableL =
+            task.lPerMeter *
+            task.cableLength;
+
+
+        /*
+           В раундах 16–20 Cᵢ и Cкабеля
+           намеренно показываются в разных единицах.
+           Внутри игры ёмкость всегда хранится в nF.
+        */
+
+        if (round % 2 === 0) {
+            task.cUnit = "µF";
+            task.cableCUnit = "nF";
+        } else {
+            task.cUnit = "nF";
+            task.cableCUnit = "µF";
+        }
+
+
+        /*
+           Повторно подбираем Ci и Li.
+        */
+
+        if (task.safe) {
+
+            task.ci = Math.max(
+                1,
+                task.c0 - task.cableC - 10
+            );
+
+            task.li = Math.max(
+                100,
+                task.l0 - task.cableL - 100
+            );
+
+        } else {
+
+            const v =
+                Math.floor(Math.random() * 5);
+
+            if (v === 0) {
+                task.ui =
+                    Math.max(1, task.u0 - 10);
+
+            } else if (v === 1) {
+                task.ii =
+                    Math.max(1, task.i0 - 30);
+
+            } else if (v === 2) {
+                task.pi =
+                    Math.max(0.1, task.p0 - 1);
+
+            } else if (v === 3) {
+                task.ci =
+                    task.c0 -
+                    task.cableC +
+                    100;
+
+            } else {
+                task.li =
+                    task.l0 -
+                    task.cableL +
+                    5000;
+            }
+        }
+    }
+
+
+    /*
+       Финальная проверка.
+       Именно она определяет правильный ответ,
+       а не переменная safe.
+    */
+
+    task.safe = (
+
+        task.ui >= task.u0 &&
+
+        task.ii >= task.i0 &&
+
+        task.pi >= task.p0 &&
+
+        task.ci + task.cableC <= task.c0 &&
+
+        task.li + task.cableL <= task.l0
+    );
+
+
+    return task;
+}
+
+
+/* =====================================================
+   ОТОБРАЖЕНИЕ ПАРАМЕТРА C
+===================================================== */
+
+function formatC(value, unit) {
+
+    if (unit === "µF") {
+
+        return (
+            value / 1000
+        ).toFixed(4) + " µF";
+
+    }
+
+    return value.toFixed(2) + " nF";
+}
+
+
+function formatCAnswer(value, unit) {
+
+    if (unit === "µF") {
+        return (value / 1000).toFixed(4) + " µF";
+    }
+
+    return value.toFixed(2) + " nF";
+}
+
+
+function convertCToNf(value, unit) {
+
+    return unit === "µF" ? value * 1000 : value;
+}
+
+
+/* =====================================================
+   ОТОБРАЖЕНИЕ ПАРАМЕТРА L
+===================================================== */
+
+function formatL(value, unit) {
+
+    if (unit === "nH") {
+
+        return (
+            value * 1000
+        ).toFixed(0) + " nH";
+
+    }
+
+    return value.toFixed(2) + " µH";
+}
+
+
+/* =====================================================
+   ОТОБРАЖЕНИЕ РАУНДА
+===================================================== */
+
+function displayRound() {
+
+    current = generateRound();
+
+    answered = false;
+    cableCalculated = !current.calculation;
+
+
+    document.getElementById("round").textContent =
+        round;
+
+    document.getElementById("score").textContent =
+        score;
+
+
+    /*
+       Уровень.
+    */
+
+    let level;
+
+    if (round <= 5) {
+
+        level = "Уровень: 🟢 начальный";
+
+    } else if (round <= 10) {
+
+        level = "Уровень: 🟡 средний";
+
+    } else if (round <= 15) {
+
+        level = "Уровень: 🟠 продвинутый";
+
+    } else {
+
+        level = "Уровень: 🔴 эксперт";
+    }
+
+    document.getElementById("level").textContent =
+        level;
+
+
+    /*
+       U₀, I₀, P₀
+    */
+
+    document.getElementById("u0").textContent =
+        current.u0 + " V";
+
+    document.getElementById("i0").textContent =
+        current.i0 + " mA";
+
+    document.getElementById("p0").textContent =
+        current.p0.toFixed(1) + " W";
+
+
+    /*
+       C₀ и L₀.
+    */
+
+    document.getElementById("c0").textContent =
+        current.c0.toFixed(2) + " nF";
+
+    document.getElementById("l0").textContent =
+        current.l0.toFixed(2) + " µH";
+
+
+    /*
+       Uᵢ, Iᵢ, Pᵢ
+    */
+
+    document.getElementById("ui").textContent =
+        current.ui + " V";
+
+    document.getElementById("ii").textContent =
+        current.ii + " mA";
+
+    document.getElementById("pi").textContent =
+        current.pi.toFixed(1) + " W";
+
+
+    /*
+       Cᵢ и Lᵢ.
+    */
+
+    document.getElementById("ci").textContent =
+        formatC(
+            current.ci,
+            current.cUnit
+        );
+
+    document.getElementById("li").textContent =
+        formatL(
+            current.li,
+            current.lUnit
+        );
+
+
+    /*
+       Кабель.
+    */
+
+    if (current.calculation) {
+
+        document.getElementById("ccable").textContent =
+            "рассчитать";
+
+        document.getElementById("lcable").textContent =
+            "рассчитать";
+
+    } else {
+
+        document.getElementById("ccable").textContent =
+            formatC(
+                current.cableC,
+                current.cableCUnit || current.cUnit
+            );
+
+        document.getElementById("lcable").textContent =
+            formatL(
+                current.cableL,
+                current.lUnit
+            );
+    }
+
+
+    /*
+       Блок расчёта.
+    */
+
+    const calcBox =
+        document.getElementById("calcBox");
+
+    if (current.calculation) {
+
+        calcBox.classList.remove("hidden");
+
+        document.getElementById("calcDescription").innerHTML = `
+
+            <p>
+                Длина кабеля:
+                <b>${current.cableLength} м</b>
+            </p>
+
+            <p>
+                Удельная ёмкость:
+                <b>${current.cPerMeter} nF/м</b>
+            </p>
+
+            <p>
+                Удельная индуктивность:
+                <b>${current.lPerMeter} µH/м</b>
+            </p>
+
+            <p>
+                Рассчитайте самостоятельно:
+            </p>
+
+            <p>
+                <b>
+                Cкабеля = C/м × длина
+                </b>
+            </p>
+
+            <p>
+                <b>
+                Lкабеля = L/м × длина
+                </b>
+            </p>
+        `;
+
+        document.getElementById("cAnswerUnit").textContent =
+            current.cableCUnit || "nF";
+
+        document.getElementById("cAnswer").value = "";
+        document.getElementById("lAnswer").value = "";
+        document.getElementById("calcResult").innerHTML = "";
+
+    } else {
+
+        calcBox.classList.add("hidden");
+    }
+
+
+    /*
+       Результат и кнопка следующего раунда.
+    */
+
+    const result =
+        document.getElementById("result");
+
+    result.style.display = "none";
+    result.innerHTML = "";
+
+    document.getElementById("nextButton").style.display =
+        "none";
+
+
+    /*
+       Прогресс.
+    */
+
+    document.getElementById("progress").style.width =
+        ((round / MAX_ROUNDS) * 100) + "%";
+}
+
+
+/* =====================================================
+   ПРОВЕРКА РАСЧЁТА КАБЕЛЯ
+===================================================== */
+
+function checkCableCalculation() {
+
+    if (!current.calculation) {
+        return;
+    }
+
+
+    const cAnswer =
+        Number(
+            document.getElementById("cAnswer").value
+        );
+
+    const lAnswer =
+        Number(
+            document.getElementById("lAnswer").value
+        );
+
+
+    const cAnswerNf =
+        Number.isFinite(cAnswer)
+            ? convertCToNf(
+                cAnswer,
+                current.cableCUnit || "nF"
+            )
+            : NaN;
+
+
+    const cOK =
+        Number.isFinite(cAnswerNf) &&
+        Math.abs(
+            cAnswerNf - current.cableC
+        ) < 0.01;
+
+
+    const lOK =
+        Number.isFinite(lAnswer) &&
+        Math.abs(
+            lAnswer - current.cableL
+        ) < 0.01;
+
+
+    cableCalculated =
+        cOK && lOK;
+
+
+    const output =
+        document.getElementById("calcResult");
+
+
+    output.innerHTML = `
+
+        <div style="margin-top:15px">
+
+            <div class="${cOK ? "ok" : "fail"}">
+
+                ${cOK ? "🟢" : "🔴"}
+
+                Cкабеля:
+
+                ${cAnswer || 0} ${current.cableCUnit || "nF"}
+
+                — правильный ответ:
+
+                ${formatCAnswer(
+                    current.cableC,
+                    current.cableCUnit || "nF"
+                )}
+
+            </div>
+
+            <div class="${lOK ? "ok" : "fail"}">
+
+                ${lOK ? "🟢" : "🔴"}
+
+                Lкабеля:
+
+                ${lAnswer || 0} µH
+
+                — правильный ответ:
+
+                ${current.cableL.toFixed(2)} µH
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+/* =====================================================
+   ПРОВЕРКА ОТВЕТА ДА / НЕТ
+===================================================== */
+
+function answer(userAnswer) {
+
+    /*
+       Нельзя отвечать до расчёта кабеля.
+    */
+
+    if (
+        current.calculation &&
+        !cableCalculated
+    ) {
+
+        const result =
+            document.getElementById("result");
+
+        result.className =
+            "result wrong";
+
+        result.style.display =
+            "block";
+
+        result.innerHTML =
+
+            "<b>⚠ Сначала правильно рассчитайте Cкабеля и Lкабеля.</b>";
+
+        return;
+    }
+
+
+    if (answered) {
+        return;
+    }
+
+
+    answered = true;
+
+
+    const isCorrect =
+        userAnswer === current.safe;
+
+
+    const result =
+        document.getElementById("result");
+
+
+    if (isCorrect) {
+
+        /*
+           За поздние раунды больше очков.
+        */
+
+        const points =
+            100 + (round - 1) * 10;
+
+        score += points;
+
+        result.className =
+            "result correct";
+
+        result.innerHTML =
+
+            "<b>✓ Правильно!</b><br><br>" +
+
+            getExplanation();
+
+    } else {
+
+        score -= 50;
+
+        result.className =
+            "result wrong";
+
+        result.innerHTML =
+
+            "<b>✕ Неверно.</b><br><br>" +
+
+            getExplanation();
+    }
+
+
+    document.getElementById("score").textContent =
+        score;
+
+    result.style.display =
+        "block";
+
+
+    document.getElementById("nextButton").style.display =
+        "inline-block";
+}
+
+
+/* =====================================================
+   ОБЪЯСНЕНИЕ
+===================================================== */
+
+function getExplanation() {
+
+    const x = current;
+
+
+    const cTotal =
+        x.ci + x.cableC;
+
+    const lTotal =
+        x.li + x.cableL;
+
+
+    const checks = [
+
+        {
+            name: "Uᵢ ≥ U₀",
+            left: x.ui,
+            right: x.u0,
+            unit: "V",
+            ok: x.ui >= x.u0
+        },
+
+        {
+            name: "Iᵢ ≥ I₀",
+            left: x.ii,
+            right: x.i0,
+            unit: "mA",
+            ok: x.ii >= x.i0
+        },
+
+        {
+            name: "Pᵢ ≥ P₀",
+            left: x.pi,
+            right: x.p0,
+            unit: "W",
+            ok: x.pi >= x.p0
+        },
+
+        {
+            name: "Cᵢ + Cкабеля ≤ C₀",
+            left: cTotal,
+            right: x.c0,
+            unit: "nF",
+            ok: cTotal <= x.c0
+        },
+
+        {
+            name: "Lᵢ + Lкабеля ≤ L₀",
+            left: lTotal,
+            right: x.l0,
+            unit: "µH",
+            ok: lTotal <= x.l0
+        }
+
+    ];
+
+
+    let html =
+        "<b>Результаты проверки:</b><br><br>";
+
+
+    checks.forEach(function(check) {
+
+        const symbol =
+            check.ok ? "≤" : ">";
+
+        const className =
+            check.ok ? "ok" : "fail";
+
+
+        html += `
+
+            <div
+                class="${className}"
+                style="margin:10px 0"
+            >
+
+                ${check.ok ? "🟢" : "🔴"}
+
+                <b>${check.name}</b>:
+
+                ${
+                    check.name.startsWith("Cᵢ")
+                        ? formatCAnswer(
+                            x.ci,
+                            x.cUnit
+                        ) +
+                        " + " +
+                        formatCAnswer(
+                            x.cableC,
+                            x.cableCUnit || x.cUnit
+                        ) +
+                        " = " +
+                        formatCAnswer(
+                            check.left,
+                            "nF"
+                        )
+                        : check.left.toFixed(2) +
+                          " " +
+                          check.unit
+                }
+
+                ${symbol}
+
+                ${check.right.toFixed(2)}
+                ${check.unit}
+
+            </div>
+        `;
+    });
+
+
+    if (x.safe) {
+
+        html += `
+
+            <br>
+
+            <span class="ok">
+
+                <b>
+                ✓ Все пять условий выполнены.
+                </b>
+
+                Соединение допустимо.
+
+            </span>
+        `;
+
+    } else {
+
+        html += `
+
+            <br>
+
+            <span class="fail">
+
+                <b>
+                ✕ Соединение недопустимо.
+                </b>
+
+                Как минимум одно условие нарушено.
+
+            </span>
+        `;
+    }
+
+
+    return html;
+}
+
+
+/* =====================================================
+   СЛЕДУЮЩИЙ РАУНД
+===================================================== */
+
+function nextRound() {
+
+    if (round >= MAX_ROUNDS) {
+
+        finishGame();
+
+        return;
+    }
+
+
+    round++;
+
+    displayRound();
+}
+
+
+/* =====================================================
+   ЗАВЕРШЕНИЕ
+===================================================== */
+
+function finishGame() {
+
+    document.getElementById("gameArea").innerHTML = `
+
+        <div class="final">
+
+            <h2>🏁 Тренировка завершена!</h2>
+
+            <p>
+                Вы прошли все
+                <b>20 раундов</b>.
+            </p>
+
+            <p style="font-size:25px">
+                Итоговый результат:
+                <b>${score}</b>
+                очков
+            </p>
+
+            <p>
+                Максимальная сложность:
+                <b>🔴 эксперт</b>
+            </p>
+
+            <button
+                class="next"
+                onclick="restartGame()"
+            >
+                🔄 Начать заново
+            </button>
+
+        </div>
+    `;
+}
+
+
+/* =====================================================
+   ПЕРЕЗАПУСК
+===================================================== */
+
+function restartGame() {
+
+    round = 1;
+    score = 0;
+    current = null;
+    answered = false;
+    cableCalculated = false;
+
+
+    /*
+       Восстанавливаем игровую область.
+       Самый надёжный способ — перезагрузить страницу.
+    */
+
+    window.location.reload();
+}
+
+
+/* =====================================================
+   ЗАПУСК ИГРЫ
+===================================================== */
+
+displayRound();
+
+</script>
+
+</body>
+</html>
